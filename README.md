@@ -16,19 +16,19 @@ Reusable time-series analysis templates primarily written in R. The material beg
 
 ## Organization
 
-Each retained notebook has a matching standalone R script in the same directory. The scripts follow the notebook order and include the Markdown narrative as comments.
+Each analysis has a GitHub-native Markdown document and a matching standalone R script in the same directory. The `.md` file presents the explanation and source code directly on GitHub; the `.R` file follows the same order and includes the narrative as comments.
 
 ```text
 CA2-Preprocessing/
-  task1.Rmd / task1.R       Air-quality preprocessing and PCA
-  Task2.Rmd / Task2.R       Frost temperature retrieval and diagnostics
+  task1.md / task1.R        Air-quality preprocessing and PCA
+  Task2.md / Task2.R        Frost temperature retrieval and diagnostics
 CA3-Forecasting/
-  Assignment03.Rmd / Assignment03.R
+  Assignment03.md / Assignment03.R
 CA4-Classification/
-  Assignment_4.Rmd / Assignment_4.R
+  Assignment_4.md / Assignment_4.R
 ```
 
-The notebooks intentionally contain no saved plots, tables, console output, or execution state. Run them locally to generate results. Generated reports and intermediate exports are ignored so the repository stays lightweight.
+The Markdown documents intentionally contain no saved plots, tables, console output, or execution state. Run the paired scripts locally to generate results. Generated reports and intermediate exports are ignored so the repository stays lightweight.
 
 ## Requirements and use
 
@@ -43,7 +43,7 @@ install.packages(c(
 ))
 ```
 
-Open an `.Rmd` file in RStudio or another R Markdown environment to work interactively. Run a matching script from the repository root with, for example:
+Read the `.md` files directly on GitHub, or open them in any Markdown viewer. Run a matching script from the repository root with, for example:
 
 ```sh
 Rscript CA3-Forecasting/Assignment03.R
