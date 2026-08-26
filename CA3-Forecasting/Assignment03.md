@@ -41,6 +41,12 @@ consumption_hourly <- read_csv2(
   show_col_types = FALSE
 )
 
+# The course copy is already limited to Ås; this also makes a full Elhub
+# municipality download safe to use under the same local filename.
+if ("KOMMUNE" %in% names(consumption_hourly)) {
+  consumption_hourly <- consumption_hourly %>%
+    filter(KOMMUNE == "Ås")
+}
 
 # Select relevant columns
 consumption_hourly <- consumption_hourly %>%

@@ -24,7 +24,7 @@ resolve_data_file <- function(filename) {
 }
 
 
-##  Part B: Import and Visualize  ##
+## Load and explore hourly measurements
 
 # Load the dataset
 data <- read.table(
@@ -118,7 +118,7 @@ ggplot(data_long, aes(x = DateTime, y = Value, color = Variable)) +
 
 
 
-##  Part C: PCA of data as is  ##
+## Establish a complete-case PCA baseline
 
 # Convert tsibble to a regular data frame
 data_df <- as.data.frame(data_tsibble)
@@ -188,7 +188,7 @@ ggplot(scores, aes(x = PC2, y = PC3)) +
 
 
 
-##  Part D: Missing values  ##
+## Diagnose and impute missing values
 
 
 # Summary of missing values
@@ -276,7 +276,7 @@ ggplot(data_long, aes(x = DateTime, y = Value, color = Variable)) +
 
 
 
-## Part E: PCA of cleaned data  ##  
+## Repeat PCA after interpolation
   
 
 # Convert to data frame for PCA

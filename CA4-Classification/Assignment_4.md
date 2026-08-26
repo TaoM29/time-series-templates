@@ -35,13 +35,12 @@ resolve_data_file <- function(filename) {
 
 ### Load and prepare generation data
 
-The source export contains quarter-hourly generation by production type. The loader skips a duplicated prefix, parses Berlin local time, removes unavailable source columns, and ranks the remaining sources by total production.
+The source export contains quarter-hourly generation by production type. The loader accepts either a clean ENTSO-E export or the local course copy with a truncated duplicate prefix, then parses Berlin local time, removes unavailable source columns, and ranks the remaining sources by total production.
 
 ```r
 
-# The supplied file contains a truncated export followed by a clean full-year
-# export. Skip the 14,758-line prefix and provide the column names explicitly.
-# "n/e" and "-" both denote unavailable observations.
+# The local course copy contains a truncated export followed by a clean
+# full-year export. A fresh ENTSO-E download contains only the clean export.
 file_path <- resolve_data_file(
   "Actual Generation per Production Type_202401010000-202501010000.csv"
 )
@@ -52,15 +51,38 @@ generation_columns <- c(
   "Hydro_Run_of_River_and_poundage", "Hydro_Water_Reservoir", "Marine", "Nuclear", "Other",
   "Other_Renewable", "Solar", "Waste", "Wind_Offshore", "Wind_Onshore"
 )
-generation_data <- read.csv(
-  file_path,
-  skip = 14758,
-  header = FALSE,
-  col.names = generation_columns,
-  na.strings = c("n/e", "-", ""),
-  stringsAsFactors = FALSE,
-  check.names = FALSE
-)
+
+read_generation_export <- function(file_path, column_names) {
+  raw_lines <- readLines(file_path, warn = FALSE)
+  header_pattern <- '"Area","MTU","Biomass'
+  header_lines <- grep(header_pattern, raw_lines, fixed = TRUE)
+
+  if (length(header_lines) == 0) {
+    stop("Could not locate the ENTSO-E generation header in ", file_path)
+  }
+
+  last_header_line <- tail(header_lines, 1)
+  has_clean_header <- startsWith(raw_lines[[last_header_line]], header_pattern)
+  skip_lines <- if (has_clean_header) last_header_line - 1 else last_header_line
+
+  generation_data <- read.csv(
+    file_path,
+    skip = skip_lines,
+    header = has_clean_header,
+    na.strings = c("n/e", "-", ""),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+
+  if (ncol(generation_data) != length(column_names)) {
+    stop("Unexpected number of columns in the ENTSO-E generation export.")
+  }
+
+  names(generation_data) <- column_names
+  generation_data
+}
+
+generation_data <- read_generation_export(file_path, generation_columns)
 
 # Change MTU to appropriate format
 generation_data <- generation_data %>%
@@ -416,6 +438,14 @@ consumption_data <- read_csv2(
   locale = locale(tz = "Europe/Oslo"),
   show_col_types = FALSE
 )
+
+# The course copy is already limited to Ås; retain the same scope if a full
+# Elhub municipality download is supplied instead.
+if ("KOMMUNE" %in% names(consumption_data)) {
+  consumption_data <- consumption_data %>%
+    filter(KOMMUNE == "Ås")
+}
+
 consumption_data <- consumption_data %>%
   mutate(
     STARTTID = with_tz(STARTTID, "Europe/Oslo"),

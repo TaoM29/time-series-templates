@@ -56,4 +56,11 @@ export FROST_CLIENT_ID="your-client-id"
 Rscript CA2-Preprocessing/Task2.R
 ```
 
-Input datasets are kept beside the analyses that use them. Paths are resolved for execution from either the repository root or the relevant template directory.
+Paths are resolved for execution from either the repository root or the relevant template directory. The analyses that use omitted datasets expect local copies beside their scripts.
+
+## Data sources
+
+- **UCI Air Quality:** Used by the preprocessing and PCA template and included in this repository. Source: UCI Machine Learning Repository, [Air Quality dataset](https://doi.org/10.24432/C59K5F), licensed under CC BY 4.0.
+- **NMBU BIOKLIM weather data:** Daily temperature and irradiation used by the forecasting template. Local course copies are not redistributed; annual data are available from NMBU's [meteorological-data page](https://www.nmbu.no/forskning/grupper/meteorologiske-data). No redistribution licence is asserted here.
+- **Elhub electricity consumption:** Aggregated municipal consumption used by the forecasting and classification templates. The local Ås subset is not redistributed; source data are available from Elhub's [data catalogue](https://elhub.no/data-og-innsikt/datakatalog) under CC BY 4.0.
+- **ENTSO-E generation:** German generation by production type used by the classification template. The local export is not redistributed; use the ENTSO-E Transparency Platform's [Actual Generation per Production Type](https://transparency.entsoe.eu/generation/r2/actualGenerationPerProductionType/show?name=) view. The applicable open data are available under CC BY 4.0.

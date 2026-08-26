@@ -1,6 +1,6 @@
 # Air-quality preprocessing and PCA
 
-This notebook is paired with `task1.R` and contains the same executable code in the same order.
+This template prepares hourly air-quality sensor measurements for exploration and principal component analysis (PCA). It compares complete-case PCA with a version fitted after linear interpolation, then reconstructs the measurements from a reduced set of components. Generated results and plots are intentionally omitted; run the paired `task1.R` script to reproduce them.
 
 ```r
 
@@ -31,7 +31,9 @@ resolve_data_file <- function(filename) {
 
 ```
 
-## Part B: Import and Visualize
+## Load and explore hourly measurements
+
+The UCI dataset uses `-200` for missing observations and stores dates and times separately. The following preparation combines them into a Rome-local timestamp, removes empty columns and incomplete calendar days, converts sensor fields to numeric values, and plots each measurement on its own scale.
 
 ```r
 
@@ -129,7 +131,9 @@ ggplot(data_long, aes(x = DateTime, y = Value, color = Variable)) +
 
 ```
 
-## Part C: PCA of data as is
+## Establish a complete-case PCA baseline
+
+PCA requires a complete numeric matrix. This baseline keeps only rows without missing measurements, standardizes variables to comparable scales, and visualizes component variance, loadings, and scores.
 
 ```r
 
@@ -203,7 +207,9 @@ ggplot(scores, aes(x = PC2, y = PC3)) +
 
 ```
 
-## Part D: Missing values
+## Diagnose and impute missing values
+
+Correlated missingness can indicate sensors that fail at similar times. After visualizing that relationship, the template removes constant columns and linearly interpolates numeric measurements along the time index.
 
 ```r
 
@@ -295,7 +301,9 @@ ggplot(data_long, aes(x = DateTime, y = Value, color = Variable)) +
 
 ```
 
-## Part E: PCA of cleaned data
+## Repeat PCA after interpolation
+
+The imputed series support a second standardized PCA using more of the observed time span. The final steps inspect explained variance and scores, reconstruct the measurements from the first components, and compare reconstructed values with the cleaned series.
 
 ```r
   

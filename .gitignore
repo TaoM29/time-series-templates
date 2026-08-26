@@ -8,6 +8,12 @@ CA3-Forecasting/TABFORKLARING.DOC
 CA4-Classification/Assignment_4_1_elev.Rmd
 CA4-Classification/Assignment_4_cornelius_tao_kris-2.Rmd
 
+# Local data and editor files not redistributed
+CA2-Preprocessing/CA2-Preprocessing.Rproj
+CA3-Forecasting/Aas dogn *.xlsx
+CA4-Classification/Actual Generation per Production Type_202401010000-202501010000.csv
+CA4-Classification/consumption_per_group_aas_hour.csv
+
 # Generated reports and intermediate exports
 CA2-Preprocessing/Plots/
 CA3-Forecasting/Assignment03.nb.html
