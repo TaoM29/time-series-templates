@@ -1,25 +1,24 @@
 # Excluded source material and out-of-scope coursework
 Lecture code/
 CA1-Foundations/
-CA2-Preprocessing/Assignment2.Rmd
-CA2-Preprocessing/AirQualityUCI.xlsx
-CA3-Forecasting/Assignment3.Rmd
-CA3-Forecasting/TABFORKLARING.DOC
-CA4-Classification/Assignment_4_1_elev.Rmd
-CA4-Classification/Assignment_4_cornelius_tao_kris-2.Rmd
+preprocessing/*.Rmd
+preprocessing/AirQualityUCI.xlsx
+forecasting/*.Rmd
+forecasting/TABFORKLARING.DOC
+clustering-and-classification/*.Rmd
 
 # Local data and editor files not redistributed
-CA2-Preprocessing/CA2-Preprocessing.Rproj
-CA3-Forecasting/Aas dogn *.xlsx
-CA4-Classification/Actual Generation per Production Type_202401010000-202501010000.csv
-CA4-Classification/consumption_per_group_aas_hour.csv
+preprocessing/*.Rproj
+forecasting/Aas dogn *.xlsx
+clustering-and-classification/Actual Generation per Production Type_202401010000-202501010000.csv
+clustering-and-classification/consumption_per_group_aas_hour.csv
 
 # Generated reports and intermediate exports
-CA2-Preprocessing/Plots/
-CA3-Forecasting/Assignment03.nb.html
-CA3-Forecasting/Assignment03.pdf
-CA3-Forecasting/seasonal_components.csv
-CA3-Forecasting/deseasonalized_smoothed_data.csv
+preprocessing/Plots/
+forecasting/*.nb.html
+forecasting/*.pdf
+forecasting/seasonal_components.csv
+forecasting/deseasonalized_smoothed_data.csv
 *_files/
 
 # macOS

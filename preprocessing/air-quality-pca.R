@@ -1,13 +1,8 @@
-# Air-quality preprocessing and PCA
-
-This template prepares hourly air-quality sensor measurements for exploration and principal component analysis (PCA). It compares complete-case PCA with a version fitted after linear interpolation, then reconstructs the measurements from a reduced set of components. Generated results and plots are intentionally omitted; run the paired `task1.R` script to reproduce them.
-
-```r
 
 
 # Air-quality preprocessing and PCA template
 #
-# Run this script from the repository root or from CA2-Preprocessing/.
+# Run this script from the repository root or from preprocessing/.
 library(tsibble)
 library(dplyr)
 library(ggplot2)
@@ -18,24 +13,18 @@ library(reshape2)
 library(zoo)
 
 resolve_data_file <- function(filename) {
-  candidates <- c(filename, file.path("CA2-Preprocessing", filename))
+  candidates <- c(filename, file.path("preprocessing", filename))
   existing <- candidates[file.exists(candidates)]
 
   if (length(existing) == 0) {
-    stop("Could not find ", filename, ". Run from the repository root or CA2-Preprocessing/.")
+    stop("Could not find ", filename, ". Run from the repository root or preprocessing/.")
   }
 
   existing[[1]]
 }
 
 
-```
-
 ## Load and explore hourly measurements
-
-The UCI dataset uses `-200` for missing observations and stores dates and times separately. The following preparation combines them into a Rome-local timestamp, removes empty columns and incomplete calendar days, converts sensor fields to numeric values, and plots each measurement on its own scale.
-
-```r
 
 # Load the dataset
 data <- read.table(
@@ -129,13 +118,7 @@ ggplot(data_long, aes(x = DateTime, y = Value, color = Variable)) +
 
 
 
-```
-
 ## Establish a complete-case PCA baseline
-
-PCA requires a complete numeric matrix. This baseline keeps only rows without missing measurements, standardizes variables to comparable scales, and visualizes component variance, loadings, and scores.
-
-```r
 
 # Convert tsibble to a regular data frame
 data_df <- as.data.frame(data_tsibble)
@@ -205,13 +188,7 @@ ggplot(scores, aes(x = PC2, y = PC3)) +
 
 
 
-```
-
 ## Diagnose and impute missing values
-
-Correlated missingness can indicate sensors that fail at similar times. After visualizing that relationship, the template removes constant columns and linearly interpolates numeric measurements along the time index.
-
-```r
 
 
 # Summary of missing values
@@ -299,13 +276,7 @@ ggplot(data_long, aes(x = DateTime, y = Value, color = Variable)) +
 
 
 
-```
-
 ## Repeat PCA after interpolation
-
-The imputed series support a second standardized PCA using more of the observed time span. The final steps inspect explained variance and scores, reconstruct the measurements from the first components, and compare reconstructed values with the cleaned series.
-
-```r
   
 
 # Convert to data frame for PCA
@@ -470,4 +441,3 @@ ggplot(filtered_scores, aes(x = PC1, y = PC2)) +
   
   
   
-```

@@ -2,7 +2,7 @@
 # # Electricity Demand Forecasting with Weather Covariates
 #
 #
-# This template combines daily private electricity consumption with temperature and global irradiation. It demonstrates time-zone-aware preprocessing, stationarity and dependence diagnostics, annual differencing, STL decomposition, rolling-origin ETS evaluation, Granger predictability tests, and ARIMAX holdout forecasting. Generated results and plots are intentionally omitted.
+# This template combines daily private electricity consumption with temperature and global irradiation. It covers time-zone-aware preprocessing, stationarity and dependence diagnostics, annual differencing, STL decomposition, rolling-origin ETS evaluation, Granger predictability tests, and ARIMAX holdout forecasting. Generated outputs and plots are intentionally omitted; run the accompanying R script to reproduce the analysis.
 #
 # ## Prepare electricity consumption
 #
@@ -34,7 +34,7 @@ resolve_data_file <- function(filename, directory) {
 # offsets embedded in the ISO-8601 timestamps.
 file_path <- resolve_data_file(
   "consumption_per_group_aas_hour.csv",
-  "CA4-Classification"
+  "clustering-and-classification"
 )
 consumption_hourly <- read_csv2(
   file_path,
@@ -42,8 +42,8 @@ consumption_hourly <- read_csv2(
   show_col_types = FALSE
 )
 
-# The course copy is already limited to Ås; this also makes a full Elhub
-# municipality download safe to use under the same local filename.
+# Retain the Ås scope if a full Elhub municipality download is supplied under
+# the same local filename.
 if ("KOMMUNE" %in% names(consumption_hourly)) {
   consumption_hourly <- consumption_hourly %>%
     filter(KOMMUNE == "Ås")
@@ -100,7 +100,7 @@ print(paste("Contiguous data starts from:", contiguous_start))
 #
 # ### Inspect daylight-saving transitions
 #
-# In Oslo, the spring transition omits one local hour and the autumn transition repeats one. The following slices make those boundary days easy to inspect before daily aggregation.
+# In Oslo, the spring transition omits one local hour and the autumn transition repeats one. Focused slices make those boundary days easy to inspect before daily aggregation.
 #
 # %%
 
@@ -138,7 +138,7 @@ library(readxl)
 process_data_year <- function(year) {
   file_name <- resolve_data_file(
     paste0("Aas dogn ", year, ".xlsx"),
-    "CA3-Forecasting"
+    "forecasting"
   )
   
   # Read the Excel file
@@ -402,7 +402,7 @@ plot_acf_pacf(merged_data_clean, "VOLUM_KWH", "(Long-term)", max_lag = 730)
 #
 # ### Interpreting ACF and PACF
 #
-# Inspect the short-lag plots for immediate persistence and weekly structure, and the long-lag plots for slowly decaying or annually repeating dependence. A sharp PACF cutoff can suggest an autoregressive order, while a sharp ACF cutoff can suggest a moving-average order. Because outputs are stripped, run the paired script before recording series-specific conclusions.
+# Inspect the short-lag plots for immediate persistence and weekly structure, and the long-lag plots for slowly decaying or annually repeating dependence. A sharp PACF cutoff can suggest an autoregressive order, while a sharp ACF cutoff can suggest a moving-average order.
 #
 # ## Remove annual seasonality
 #
@@ -600,7 +600,7 @@ print(granger_test_deseasonalized_avg_temp_global_irradiation)
 #
 # ## Evaluate univariate ETS forecasts
 #
-# The following rolling-origin evaluation always trains on observations that precede the validation window. This chronological design avoids the future-to-past leakage that random cross-validation would introduce. ETS models provide a compact baseline for private consumption, temperature, and irradiation; weekly seasonality is used because the consumption series contains too few complete annual cycles for stable yearly estimation.
+# Rolling-origin evaluation always trains on observations that precede the validation window. This chronological design avoids the future-to-past leakage that random cross-validation would introduce. ETS models provide a compact baseline for private consumption, temperature, and irradiation; weekly seasonality is used because the consumption series contains too few complete annual cycles for stable yearly estimation.
 #
 #
 # %%

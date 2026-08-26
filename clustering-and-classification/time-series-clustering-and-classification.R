@@ -1,8 +1,9 @@
-# Time-Series Similarity, Clustering, and Segmentation
-
-This template presents two complementary classification workflows. The first compares German electricity-generation series with several dissimilarity measures, hierarchical clustering, and hidden Markov segmentation. The second represents daily consumption as 24-hour profiles and evaluates whether unsupervised clusters recover weekday and weekend patterns. Generated plots and fitted output are intentionally omitted.
-
-```r
+# %% [markdown]
+# # Time-Series Clustering, Segmentation, and Classification
+#
+# This template presents two complementary time-series workflows. The first compares German electricity-generation series with several dissimilarity measures, hierarchical clustering, and hidden Markov segmentation. The second represents daily consumption as 24-hour profiles and evaluates whether unsupervised clusters recover weekday and weekend patterns. Generated outputs and plots are intentionally omitted; run the accompanying R script to reproduce the analysis.
+#
+# %%
 # Load the necessary packages
 library(readr)
 library(dplyr)
@@ -18,28 +19,29 @@ library(caret)
 library(depmixS4)
 
 resolve_data_file <- function(filename) {
-  candidates <- c(filename, file.path("CA4-Classification", filename))
+  candidates <- c(filename, file.path("clustering-and-classification", filename))
   existing <- candidates[file.exists(candidates)]
 
   if (length(existing) == 0) {
-    stop("Could not find ", filename, ". Run from the repository root or CA4-Classification/.")
+    stop("Could not find ", filename, ". Run from the repository root or clustering-and-classification/.")
   }
 
   existing[[1]]
 }
 
-```
 
+# %% [markdown]
+#
+#
+# ## Compare electricity-generation series
+#
+# ### Load and prepare generation data
+#
+# The source export contains quarter-hourly generation by production type. The loader accepts either a clean ENTSO-E export or a legacy local export with a truncated duplicate prefix, then parses Berlin local time, removes unavailable source columns, and ranks the remaining sources by total production.
+#
+# %%
 
-## Compare electricity-generation series
-
-### Load and prepare generation data
-
-The source export contains quarter-hourly generation by production type. The loader accepts either a clean ENTSO-E export or the local course copy with a truncated duplicate prefix, then parses Berlin local time, removes unavailable source columns, and ranks the remaining sources by total production.
-
-```r
-
-# The local course copy contains a truncated export followed by a clean
+# The legacy local copy contains a truncated export followed by a clean
 # full-year export. A fresh ENTSO-E download contains only the clean export.
 file_path <- resolve_data_file(
   "Actual Generation per Production Type_202401010000-202501010000.csv"
@@ -135,15 +137,16 @@ print(top_sources)
 
 
 
-```
 
-
-### Explore leading generation sources
-
-January provides a compact window for comparing the six largest sources. The faceted plot shows their original scales; the distance matrices then contrast magnitude, co-movement, autoregressive structure, and locally time-warped shape.
-
-
-```r
+# %% [markdown]
+#
+#
+# ### Explore leading generation sources
+#
+# January provides a compact window for comparing the six largest sources. The faceted plot shows their original scales; the distance matrices then contrast magnitude, co-movement, autoregressive structure, and locally time-warped shape.
+#
+#
+# %%
 
 
 # Filter the data for January 2024
@@ -263,18 +266,21 @@ ggplot(autocorrelation_data, aes(x = Lag, y = ACF)) +
   )
 
 
-```
-### Summary of the exploratory analysis
 
-Use Euclidean distance to compare absolute production magnitudes, correlation dissimilarity to compare scale-free co-movement, DTW to compare shapes with local timing shifts, and AR.PIC to compare autoregressive dynamics. The ACF panels show persistence within each source. Run the paired script to identify the source-specific groupings; saved results are intentionally omitted.
-
-Euclidean distance and Pearson correlation dissimilarity are carried forward to show how a scale-sensitive and scale-free definition of similarity produce different hierarchies.
-
-
-
-### Hierarchical clustering
-
-```r
+# %% [markdown]
+# ### Choose distance measures
+#
+# Euclidean distance compares absolute production magnitudes, correlation dissimilarity compares scale-free co-movement, DTW compares shapes with local timing shifts, and AR.PIC compares autoregressive dynamics. The ACF panels assess persistence within each source.
+#
+# Euclidean distance and Pearson correlation dissimilarity are carried forward to show how a scale-sensitive and scale-free definition of similarity produce different hierarchies.
+#
+#
+#
+# ### Hierarchical clustering
+#
+# The Euclidean dendrogram emphasizes differences in scale, while correlation dissimilarity groups sources by co-movement. Comparing both views shows how the definition of similarity changes the hierarchy.
+#
+# %%
 
 # Perform hierarchical clustering 
 hc_euclidean <- hclust(dist(t(as.matrix(generation_series))), method = "ward.D2")
@@ -354,16 +360,13 @@ ggplot(january_data_long_pearson, aes(x = MTU, y = Production, color = Pearson_C
 
 
 
-```
-### Interpretation of the groupings
 
-Compare the dendrograms to see how scale-sensitive Euclidean distance and scale-free correlation dissimilarity change the groupings. Interpret cluster membership only after regenerating the plots, because the document stores no fitted output.
-
-### Hidden Markov segmentation
-
-A separate two-state Gaussian hidden Markov model divides each generation series into latent operating regimes. The states are data-driven labels rather than predefined low/high categories, so interpret them from the regenerated state-colored plots.
-
-```r
+# %% [markdown]
+# ### Hidden Markov segmentation
+#
+# A separate two-state Gaussian hidden Markov model divides each generation series into latent operating regimes. The states are data-driven labels rather than predefined low/high categories; the state-colored time series show the production levels and transitions associated with each regime.
+#
+# %%
 
 # Create a Function to fit a two-state HMM 
 fit_hmm <- function(time_series) {
@@ -395,8 +398,8 @@ colnames(state_data)[-1] <- colnames(generation_series)
 
 
 
-```
-```r
+
+# %%
 
 # Reshape state data for visualization
 state_data_long <- state_data %>%
@@ -417,19 +420,20 @@ ggplot(state_data_long, aes(x = MTU, y = Production, color = factor(State), grou
     color = "State"
   )
 
-```
 
-### How the generation methods differ
-
-The methods answer complementary questions: distance measures compare whole series, hierarchical clustering summarizes between-series similarity, autocorrelation describes within-series persistence, and hidden Markov models segment each series into latent regimes. Euclidean distance is sensitive to scale, correlation focuses on co-movement, and DTW tolerates local timing shifts. Use the regenerated plots and fitted state sequences to make source-specific claims.
-
-## Classify weekday and weekend consumption
-
-### Load and summarize consumption
-
-The consumption data contain hourly readings for private, business, and industrial groups. After converting timestamps to Oslo local time, the code selects the longest contiguous date range and summarizes mean daily consumption by weekday. Averaging daily totals avoids confounding weekday patterns with unequal numbers of Mondays, Tuesdays, and other weekdays in the sample.
-
-```r
+# %% [markdown]
+#
+# ### How the generation methods differ
+#
+# The methods answer complementary questions: distance measures compare whole series, hierarchical clustering summarizes between-series similarity, autocorrelation describes within-series persistence, and hidden Markov models segment each series into latent regimes. Euclidean distance is sensitive to scale, correlation focuses on co-movement, and DTW tolerates local timing shifts. Source-specific interpretation should consider both the cluster structure and the fitted state sequences.
+#
+# ## Classify weekday and weekend consumption
+#
+# ### Load and summarize consumption
+#
+# The consumption data contain hourly readings for private, business, and industrial groups. After converting timestamps to Oslo local time, the code selects the longest contiguous date range and summarizes mean daily consumption by weekday. Averaging daily totals avoids confounding weekday patterns with unequal numbers of Mondays, Tuesdays, and other weekdays in the sample.
+#
+# %%
 
 # Import the dataset. read_csv2() handles decimal commas and ISO-8601 offsets.
 file_path <- resolve_data_file("consumption_per_group_aas_hour.csv")
@@ -439,8 +443,8 @@ consumption_data <- read_csv2(
   show_col_types = FALSE
 )
 
-# The course copy is already limited to Ås; retain the same scope if a full
-# Elhub municipality download is supplied instead.
+# Retain the Ås scope if a full Elhub municipality download is supplied under
+# the same local filename.
 if ("KOMMUNE" %in% names(consumption_data)) {
   consumption_data <- consumption_data %>%
     filter(KOMMUNE == "Ås")
@@ -555,13 +559,14 @@ print(private_plot)
 
 
 
-```
 
-### Compare daily load shapes
-
-Each consumer group is reshaped into a matrix whose columns are complete days and whose rows are local clock hours. Euclidean distance compares profiles hour by hour, while dynamic time warping (DTW) tolerates small shifts in the timing of peaks. The eight-week window avoids daylight-saving days, which would otherwise require explicit handling of 23- and 25-hour profiles.
-
-```r
+# %% [markdown]
+#
+# ### Compare daily load shapes
+#
+# Each consumer group is reshaped into a matrix whose columns are complete days and whose rows are local clock hours. Euclidean distance compares profiles hour by hour, while dynamic time warping (DTW) tolerates small shifts in the timing of peaks. The eight-week window avoids daylight-saving days, which would otherwise require explicit handling of 23- and 25-hour profiles.
+#
+# %%
 
 
 
@@ -768,14 +773,15 @@ visualize_chronological_heatmap(industry_dtw,
                                 palette_function = viridis::cividis)
 
 
-```
 
-
-### Cluster and evaluate daily profiles
-
-The profiles are smoothed with a three-hour centered mean and normalized within each day so clustering emphasizes shape rather than absolute consumption. Cluster labels are arbitrary, so the evaluation checks both possible label mappings before calculating weekday/weekend accuracy. Ward's method is used for Euclidean distances; average linkage is used for DTW because Ward's variance criterion assumes Euclidean geometry.
-
-```r
+# %% [markdown]
+#
+#
+# ### Cluster and evaluate daily profiles
+#
+# The profiles are smoothed with a three-hour centered mean and normalized within each day so clustering emphasizes shape rather than absolute consumption. Cluster labels are arbitrary, so the evaluation checks both possible label mappings before calculating weekday/weekend accuracy. Ward's method is used for Euclidean distances; average linkage is used for DTW because Ward's variance criterion assumes Euclidean geometry.
+#
+# %%
 
 # Smooth the matrices with a rolling mean (k = 3)
 private_matrix <- smooth_matrix(private_matrix, k = 3)
@@ -894,20 +900,19 @@ ggplot(metrics, aes(x = Group, y = Accuracy, fill = Method)) +
   theme_minimal()
 
 
-```
 
-#### Interpret clustering metrics
-The code prints confusion matrices and plots accuracy after aligning arbitrary cluster IDs to the weekday/weekend labels. Compare Euclidean and DTW within each consumer group rather than treating the raw cluster numbers as class labels. Euclidean distance emphasizes point-by-point magnitude differences, whereas DTW permits local temporal alignment and may be more useful when peaks occur at slightly different hours.
-
-Because generated outputs are intentionally omitted, rerun the analysis before drawing conclusions about which method or consumer group performs best.
-
-
-
-### Diagnose misclassified days
-
-The diagnostic below focuses on the industry DTW clustering. Comparing misclassified and correctly classified daily curves can reveal where temporal alignment is insufficient. The eight-week window begins on 1 January, so public holidays must be considered explicitly.
- 
-```r
+# %% [markdown]
+#
+# #### Compare clustering metrics
+# The code prints confusion matrices and plots accuracy after aligning arbitrary cluster IDs to the weekday/weekend labels. Compare Euclidean and DTW within each consumer group rather than treating the raw cluster numbers as class labels. Euclidean distance emphasizes point-by-point magnitude differences, whereas DTW permits local temporal alignment and may be more useful when peaks occur at slightly different hours.
+#
+#
+#
+# ### Diagnose misclassified days
+#
+# The diagnostic below focuses on the industry DTW clustering. Comparing misclassified and correctly classified daily curves can reveal where temporal alignment is insufficient. The eight-week window begins on 1 January, so public holidays must be considered explicitly.
+#  
+# %%
 
 # Ground truth (weekday = 1, weekend = 2)
 ground_truth <- ifelse(wday(as.Date(colnames(industry_matrix))) %in% c(1, 7), 2, 1)
@@ -989,8 +994,8 @@ print(special_days)
 
 
 
-```
-```r
+
+# %%
 
 if (length(misclassified_days) > 0 && length(correctly_classified_days) > 0) {
   profile_summary <- data.frame(
@@ -1028,6 +1033,7 @@ if (length(misclassified_days) > 0 && length(correctly_classified_days) > 0) {
     theme_minimal()
 }
 
-```
 
-The profile comparison helps distinguish shape overlap from calendar effects. Cross-reference any errors with `special_days`: a public holiday can follow a weekend-like demand pattern even when its calendar label is a weekday. Do not infer a source-specific explanation until the diagnostics have been regenerated.
+# %% [markdown]
+#
+# The profile comparison helps distinguish shape overlap from calendar effects. Cross-reference any errors with `special_days`: a public holiday can follow a weekend-like demand pattern even when its calendar label is a weekday.

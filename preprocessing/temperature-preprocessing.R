@@ -1,7 +1,7 @@
 # %% [markdown]
-# # Daily Temperature Retrieval and Diagnostics
+# # Daily Temperature Preprocessing with the Frost API
 #
-# This template retrieves daily mean air temperature from the Norwegian Meteorological Institute's Frost API, regularizes the observations, imputes short gaps, and demonstrates seasonal diagnostics. Generated values and plots are intentionally omitted; run the paired `Task2.R` script to reproduce them.
+# This template retrieves daily mean air temperature from the Norwegian Meteorological Institute's Frost API, regularizes the observations, imputes short gaps, and examines seasonal dependence. Generated outputs and plots are intentionally omitted; run the accompanying R script to reproduce the analysis.
 #
 # Set the `FROST_CLIENT_ID` environment variable before requesting data. The example uses station `SN17850` from 2000 through 2023.
 #
@@ -199,7 +199,6 @@ ggplot(october_1st_data, aes(x = year(Date), y = Temperature)) +
     y = "Temperature"
   ) +
   theme_minimal()
-
 
 
 
